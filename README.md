@@ -10,6 +10,10 @@
 [![export](https://img.shields.io/badge/export-7%20languages-7c6cff.svg)](#what-it-does)
 [![ReDoS](https://img.shields.io/badge/ReDoS-backtracking%20analysis-7c6cff.svg)](#the-one-interesting-engineering-decision)
 
+[![snare screenshot](docs/screenshot.png)](https://martin-k-m.github.io/snare/)
+
+<sub>Eight log lines matched, capture groups broken out per match, and the malformed line correctly left alone. <a href="https://martin-k-m.github.io/snare/">Try it</a>.</sub>
+
 A regular expression workbench: write a pattern, watch it match, read it back in
 plain English, and find out whether it can be made to backtrack catastrophically
 — before it ends up in a validator on a public endpoint.

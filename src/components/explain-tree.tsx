@@ -1,6 +1,7 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
+import { entranceProps } from "@/components/ui/motion";
 import type { RxNode } from "@/lib/regex/explain";
 import { EmptyState } from "@/components/ui/controls";
 
@@ -44,14 +45,14 @@ function NodeList({
   depth: number;
   onHover: (node: RxNode | null) => void;
 }) {
+  const reduce = useReducedMotion();
+
   return (
     <ol className={depth === 0 ? "space-y-1.5" : "mt-1.5 space-y-1.5 border-l border-line pl-3"}>
       {nodes.map((node, index) => (
         <motion.li
           key={node.id}
-          initial={{ opacity: 0, x: -4 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.22, delay: Math.min(index + depth, 10) * 0.02 }}
+          {...entranceProps(reduce, { index: index + depth, axis: "x", distance: -4, duration: 0.22, step: 0.02 })}
           onMouseEnter={() => onHover(node)}
           onMouseLeave={() => onHover(null)}
           onFocus={() => onHover(node)}

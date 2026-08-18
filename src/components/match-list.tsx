@@ -1,6 +1,7 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
+import { entranceProps } from "@/components/ui/motion";
 import type { MatchRecord } from "@/lib/regex/matcher";
 import { EmptyState } from "@/components/ui/controls";
 
@@ -13,6 +14,8 @@ interface MatchListProps {
 }
 
 export function MatchList({ matches, activeOrdinal, onHover, onSelect, truncated }: MatchListProps) {
+  const reduce = useReducedMotion();
+
   if (matches.length === 0) {
     return (
       <EmptyState
@@ -28,9 +31,7 @@ export function MatchList({ matches, activeOrdinal, onHover, onSelect, truncated
         {matches.map((match, index) => (
           <motion.li
             key={`${match.start}-${match.ordinal}`}
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2, delay: Math.min(index, 12) * 0.012 }}
+            {...entranceProps(reduce, { index, distance: 4, duration: 0.2, step: 0.012 })}
             onMouseEnter={() => onHover(match.ordinal)}
             onMouseLeave={() => onHover(null)}
             data-active={match.ordinal === activeOrdinal || undefined}

@@ -1,6 +1,7 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
+import { entranceProps } from "@/components/ui/motion";
 import type { Finding, RiskLevel } from "@/lib/regex/risk";
 import { EmptyState } from "@/components/ui/controls";
 
@@ -17,6 +18,8 @@ const LEVEL_LABEL: Record<RiskLevel, string> = {
 };
 
 export function RiskList({ findings }: { findings: Finding[] }) {
+  const reduce = useReducedMotion();
+
   if (findings.length === 0) {
     return (
       <EmptyState
@@ -32,9 +35,7 @@ export function RiskList({ findings }: { findings: Finding[] }) {
         {findings.map((finding, index) => (
           <motion.li
             key={finding.id}
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.25, delay: index * 0.04 }}
+            {...entranceProps(reduce, { index, distance: 6, duration: 0.25, step: 0.04 })}
             className={`rounded-lg border p-3 ${LEVEL_STYLE[finding.level]}`}
           >
             <div className="flex items-baseline justify-between gap-3">

@@ -2,6 +2,9 @@
 
 *A pattern that catches text — and the trap you can set for yourself.*
 
+[![CI](https://github.com/martin-k-m/snare/actions/workflows/ci.yml/badge.svg)](https://github.com/martin-k-m/snare/actions/workflows/ci.yml)
+[![licence: MIT](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
+
 A regular expression workbench: write a pattern, watch it match, read it back in
 plain English, and find out whether it can be made to backtrack catastrophically
 — before it ends up in a validator on a public endpoint.

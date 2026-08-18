@@ -4,6 +4,7 @@
 
 [![CI](https://github.com/martin-k-m/snare/actions/workflows/ci.yml/badge.svg)](https://github.com/martin-k-m/snare/actions/workflows/ci.yml)
 [![licence: MIT](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
+[![live](https://img.shields.io/badge/live-martin--k--m.github.io-brightgreen.svg)](https://martin-k-m.github.io/snare/)
 
 A regular expression workbench: write a pattern, watch it match, read it back in
 plain English, and find out whether it can be made to backtrack catastrophically
@@ -72,9 +73,14 @@ unit-testable and reusable inside the worker.
 
 ## Deploy
 
-Static, client-only and free of environment variables, so it deploys as-is.
+**Live: <https://martin-k-m.github.io/snare/>**
 
-Import the repository once and every push to `main` ships automatically:
+Static, client-only and free of environment variables. Every push to `main`
+rebuilds and republishes it through the Pages workflow; `next.config.ts` switches
+to `output: "export"` with a `/snare` base path only when `GITHUB_PAGES` is set,
+so local development is unaffected.
+
+To host it on Vercel instead:
 
 ```bash
 npx vercel login

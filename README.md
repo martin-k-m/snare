@@ -32,6 +32,15 @@ Everything runs in the browser. Nothing you paste leaves the page.
   URL fragment as you type, so a refresh loses nothing and a copied link
   reproduces the workbench exactly. Nothing is stored server-side.
 - **Copy matches as JSON**, groups included, for pasting into a test fixture.
+- **Expectations that pass or fail.** List the strings the pattern must accept
+  and the ones it must reject, and watch them go green or red as you edit. A
+  failing case says what actually happened — "matched “2026-08-18” but should not
+  have" — which is usually the missing anchor.
+- **Export to seven languages** (JavaScript, TypeScript, Python, Go, Java, Ruby,
+  Rust) with the quoting done properly and the flags translated, plus a note
+  wherever the target cannot express what the pattern says — Go and Rust have no
+  lookaround, Ruby's `/m` is JavaScript's `s`, and Python needs `finditer` where
+  JavaScript uses `g`.
 
 ## The one interesting engineering decision
 

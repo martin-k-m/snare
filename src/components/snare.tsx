@@ -18,11 +18,20 @@ import { explain, PatternError, type RxNode } from "@/lib/regex/explain";
 import { assessRisk, worstLevel } from "@/lib/regex/risk";
 import { LIBRARY, type LibraryEntry } from "@/lib/regex/library";
 import { decodeState, encodeState } from "@/lib/share";
+import { ExpectationsPanel } from "@/components/expectations-panel";
+import { CodePanel } from "@/components/code-panel";
+import { evaluateExpectations, type Expectation } from "@/lib/regex/expectations";
 
-type Tab = "matches" | "explain" | "risk";
+type Tab = "matches" | "explain" | "risk" | "expect" | "code";
 
 const INITIAL = LIBRARY.find((entry) => entry.id === "log-line")!;
 const NO_MATCHES: MatchRecord[] = [];
+
+const INITIAL_EXPECTATIONS: Expectation[] = [
+  { id: "x1", text: "2026-08-18T09:15:00Z INFO worker started", shouldMatch: true },
+  { id: "x2", text: "2026-08-18T09:15:04Z ERROR upstream timeout", shouldMatch: true },
+  { id: "x3", text: "not a log line", shouldMatch: false },
+];
 
 export function Snare() {
   const [pattern, setPattern] = useState(INITIAL.pattern);
@@ -35,6 +44,7 @@ export function Snare() {
   const [copied, setCopied] = useState(false);
   const [copiedJson, setCopiedJson] = useState(false);
   const [highlight, setHighlight] = useState<PatternHighlight | null>(null);
+  const [expectations, setExpectations] = useState<Expectation[]>(INITIAL_EXPECTATIONS);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Restore a shared permalink before the first match runs.
@@ -45,17 +55,18 @@ export function Snare() {
     setFlags(shared.flags);
     setInput(shared.input);
     setReplacement(shared.replacement);
+    if (shared.expectations.length > 0) setExpectations(shared.expectations);
   }, []);
 
   // Keep the address bar in step so a refresh — or a copied URL — restores the
   // exact state. Debounced, and replaceState so it does not fill up history.
   useEffect(() => {
     const timer = setTimeout(() => {
-      const hash = encodeState({ pattern, flags, input, replacement });
+      const hash = encodeState({ pattern, flags, input, replacement, expectations });
       window.history.replaceState(null, "", `#${hash}`);
     }, 400);
     return () => clearTimeout(timer);
-  }, [pattern, flags, input, replacement]);
+  }, [pattern, flags, input, replacement, expectations]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -82,6 +93,10 @@ export function Snare() {
   }, [deferredPattern]);
 
   const findings = useMemo(() => assessRisk(parsed.tree), [parsed.tree]);
+  const report = useMemo(
+    () => evaluateExpectations(deferredPattern, flags, expectations),
+    [deferredPattern, flags, expectations],
+  );
   const risk = worstLevel(findings);
 
   const outcome = state.kind === "done" ? state.outcome : null;
@@ -146,7 +161,7 @@ export function Snare() {
   }, [matches]);
 
   const share = useCallback(async () => {
-    const hash = encodeState({ pattern, flags, input, replacement });
+    const hash = encodeState({ pattern, flags, input, replacement, expectations });
     const url = `${window.location.origin}${window.location.pathname}#${hash}`;
     window.history.replaceState(null, "", `#${hash}`);
     try {
@@ -156,7 +171,7 @@ export function Snare() {
     } catch {
       setCopied(false);
     }
-  }, [pattern, flags, input, replacement]);
+  }, [pattern, flags, input, replacement, expectations]);
 
   return (
     <div className="mx-auto flex min-h-[100dvh] max-w-[1500px] flex-col gap-3 p-3 lg:h-[100dvh] lg:p-4">
@@ -242,6 +257,8 @@ export function Snare() {
                   { value: "matches", label: "Matches", badge: matches.length },
                   { value: "explain", label: "Explain" },
                   { value: "risk", label: "Risk", badge: findings.length || undefined },
+                  { value: "expect", label: "Tests", badge: report.failed || undefined },
+                  { value: "code", label: "Code" },
                 ]}
               />
             </div>
@@ -275,6 +292,27 @@ export function Snare() {
                 />
               )}
               {tab === "risk" && <RiskList findings={findings} />}
+              {tab === "expect" && (
+                <ExpectationsPanel
+                  expectations={expectations}
+                  report={report}
+                  onChange={(id, patch) =>
+                    setExpectations((current) =>
+                      current.map((item) => (item.id === id ? { ...item, ...patch } : item)),
+                    )
+                  }
+                  onRemove={(id) =>
+                    setExpectations((current) => current.filter((item) => item.id !== id))
+                  }
+                  onAdd={() =>
+                    setExpectations((current) => [
+                      ...current,
+                      { id: `x${Date.now().toString(36)}`, text: "", shouldMatch: true },
+                    ])
+                  }
+                />
+              )}
+              {tab === "code" && <CodePanel pattern={deferredPattern} flags={flags} />}
             </motion.div>
           </AnimatePresence>
         </Panel>

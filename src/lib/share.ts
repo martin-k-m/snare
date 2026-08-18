@@ -1,8 +1,11 @@
+import type { Expectation } from "./regex/expectations";
+
 export interface ShareState {
   pattern: string;
   flags: string;
   input: string;
   replacement: string;
+  expectations: Expectation[];
 }
 
 /** Base64url so the payload survives a URL fragment without escaping newlines. */
@@ -36,6 +39,15 @@ export function decodeState(fragment: string): ShareState | null {
       flags: typeof value.flags === "string" ? value.flags : "g",
       input: typeof value.input === "string" ? value.input : "",
       replacement: typeof value.replacement === "string" ? value.replacement : "",
+      // Links shared before expectations existed simply carry none.
+      expectations: Array.isArray(value.expectations)
+        ? value.expectations.filter(
+            (item): item is Expectation =>
+              typeof item?.id === "string" &&
+              typeof item?.text === "string" &&
+              typeof item?.shouldMatch === "boolean",
+          )
+        : [],
     };
   } catch {
     return null;

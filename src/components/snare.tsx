@@ -356,7 +356,7 @@ function StatusPill({
   }
   if (state.kind === "done" && state.outcome.status === "ok") {
     return (
-      <span className="tabular text-[11px] text-subtle">
+      <span role="status" aria-live="polite" className="tabular text-[11px] text-subtle">
         {count} {count === 1 ? "match" : "matches"} · {state.outcome.durationMs}ms
         {state.isolated ? "" : " · inline"}
       </span>

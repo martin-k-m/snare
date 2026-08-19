@@ -127,7 +127,7 @@ export function PatternField({
             transition={{ duration: 0.18 }}
             className="overflow-hidden border-t border-line"
           >
-            <div className="px-4 py-2">
+            <div className="px-4 py-2" role="alert">
               <p className="font-mono text-xs text-err">{error.message}</p>
               {error.index !== undefined && (
                 <p className="mt-1 font-mono text-xs text-subtle">

@@ -39,6 +39,7 @@ export function useMatcher(request: MatchRequest): MatcherState {
 
   const { pattern, flags, input, limit } = request;
 
+  /* eslint-disable react-hooks/set-state-in-effect -- match results arrive from a worker; there is nowhere else to put them */
   useEffect(() => {
     if (pattern === "") {
       setState({ kind: "done", outcome: { status: "ok", matches: [], truncated: false, durationMs: 0 }, isolated: true });
@@ -77,6 +78,7 @@ export function useMatcher(request: MatchRequest): MatcherState {
       worker.removeEventListener("message", onMessage);
     };
   }, [pattern, flags, input, limit]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   return state;
 }

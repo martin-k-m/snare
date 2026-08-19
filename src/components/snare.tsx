@@ -48,6 +48,7 @@ export function Snare() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Restore a shared permalink before the first match runs.
+  /* eslint-disable react-hooks/set-state-in-effect -- the fragment is client-only, so it is adopted after hydration matches */
   useEffect(() => {
     const shared = decodeState(window.location.hash);
     if (!shared) return;
@@ -57,6 +58,7 @@ export function Snare() {
     setReplacement(shared.replacement);
     if (shared.expectations.length > 0) setExpectations(shared.expectations);
   }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // Keep the address bar in step so a refresh — or a copied URL — restores the
   // exact state. Debounced, and replaceState so it does not fill up history.

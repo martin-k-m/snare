@@ -13,7 +13,7 @@ interface LibraryPaletteProps {
 
 export function LibraryPalette({ open, onClose, onPick }: LibraryPaletteProps) {
   const [query, setQuery] = useState("");
-  const [cursor, setCursor] = useState(0);
+  const [rawCursor, setCursor] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const dialogRef = useDialog(open, onClose);
 
@@ -28,6 +28,7 @@ export function LibraryPalette({ open, onClose, onPick }: LibraryPaletteProps) {
     );
   }, [query]);
 
+  /* eslint-disable react-hooks/set-state-in-effect -- clearing the search belongs to the act of opening, outside the render cycle */
   useEffect(() => {
     if (!open) return;
     setQuery("");
@@ -35,10 +36,12 @@ export function LibraryPalette({ open, onClose, onPick }: LibraryPaletteProps) {
     const frame = requestAnimationFrame(() => inputRef.current?.focus());
     return () => cancelAnimationFrame(frame);
   }, [open]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
-  useEffect(() => {
-    setCursor((current) => Math.min(current, Math.max(0, results.length - 1)));
-  }, [results.length]);
+  // Clamped as it is read: filtering the list down must not leave the selection
+  // pointing past the end, and correcting it in an effect would render the bad
+  // state first.
+  const cursor = Math.min(rawCursor, Math.max(0, results.length - 1));
 
   const commit = (entry: LibraryEntry | undefined) => {
     if (!entry) return;

@@ -3,11 +3,14 @@
 import { useMemo, useState } from "react";
 import { motion } from "motion/react";
 import { LANGUAGES, toSnippet, type Language } from "@/lib/regex/codegen";
+import { checkCompatibility, portableTo } from "@/lib/regex/compatibility";
 import { useEntrance } from "@/components/ui/motion";
 
 export function CodePanel({ pattern, flags }: { pattern: string; flags: string }) {
   const [language, setLanguage] = useState<Language>("python");
   const snippet = useMemo(() => toSnippet(pattern, flags, language), [pattern, flags, language]);
+  const problems = useMemo(() => checkCompatibility(pattern, language), [pattern, language]);
+  const portable = useMemo(() => portableTo(pattern, LANGUAGES), [pattern]);
   const [copied, setCopied] = useState(false);
   const entrance = useEntrance({ distance: 4, duration: 0.2 });
 
@@ -20,8 +23,9 @@ export function CodePanel({ pattern, flags }: { pattern: string; flags: string }
             type="button"
             onClick={() => setLanguage(option)}
             aria-pressed={option === language}
+            title={portable.includes(option) ? undefined : "This target cannot run the pattern as written"}
             className={`relative rounded px-2 py-1 text-[11px] transition-colors ${
-              option === language ? "text-fg" : "text-subtle hover:text-muted"
+              option === language ? "text-fg" : portable.includes(option) ? "text-subtle hover:text-muted" : "text-subtle/50 hover:text-muted"
             }`}
           >
             {option === language && (
@@ -31,7 +35,10 @@ export function CodePanel({ pattern, flags }: { pattern: string; flags: string }
                 className="absolute inset-0 rounded bg-raised"
               />
             )}
-            <span className="relative">{toSnippet("", "", option).label}</span>
+            <span className="relative">
+              {toSnippet("", "", option).label}
+              {!portable.includes(option) && <span className="ml-1 text-warn">!</span>}
+            </span>
           </button>
         ))}
 
@@ -53,6 +60,20 @@ export function CodePanel({ pattern, flags }: { pattern: string; flags: string }
       </div>
 
       <motion.div key={language} {...entrance} className="min-h-0 flex-1 overflow-auto">
+        {problems.length > 0 && (
+          <ul className="space-y-2 p-3 pb-0">
+            {problems.map((problem) => (
+              <li
+                key={problem.construct}
+                className="rounded-lg border border-warn/40 bg-warn/[0.07] p-3 text-xs text-muted"
+              >
+                <code className="font-mono text-[12px] text-fg">{problem.source}</code>
+                <span className="ml-2">{problem.detail}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+
         <pre className="px-4 py-3 font-mono text-[12px] leading-relaxed text-fg">{snippet.code}</pre>
 
         {snippet.notes.length > 0 && (

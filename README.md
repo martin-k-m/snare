@@ -40,6 +40,10 @@ Everything runs in the browser. Nothing you paste leaves the page.
   URL fragment as you type, so a refresh loses nothing and a copied link
   reproduces the workbench exactly. Nothing is stored server-side.
 - **Copy matches as JSON**, groups included, for pasting into a test fixture.
+- **Portability warnings.** A pattern that works here can fail elsewhere: the
+  Code tab marks the targets that cannot run it and says why — Go and Rust use
+  RE2, which has no lookaround or backreferences at all, and Python's lookbehind
+  must be fixed width.
 - **Expectations that pass or fail.** List the strings the pattern must accept
   and the ones it must reject, and watch them go green or red as you edit. A
   failing case says what actually happened — "matched “2026-08-18” but should not

@@ -62,7 +62,16 @@ export function assessRisk(tree: RxNode[]): Finding[] {
       const alternation = (node.children ?? []).find((child) => child.kind === "alternation");
       const branches = alternation?.children ?? [];
       const firsts = branches.map((branch) => branch.children?.[0]?.source ?? "");
-      const overlapping = firsts.some((value, i) => value !== "" && firsts.indexOf(value) !== i);
+      // One branch's opening text being a prefix of another's is enough: both
+      // branches can start on the same input, so the engine has a choice to
+      // make and to retry. Equality is the special case where they are the
+      // same length. The parser coalesces adjacent literals, so `ab` arrives as
+      // one node and a plain equality test would miss `(a|ab)*`.
+      const overlapping = firsts.some(
+        (value, i) =>
+          value !== "" &&
+          firsts.some((other, j) => i !== j && other !== "" && other.startsWith(value)),
+      );
       if (overlapping) {
         findings.push({
           id: `ambiguous:${node.id}`,

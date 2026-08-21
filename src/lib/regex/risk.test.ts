@@ -33,17 +33,30 @@ describe("assessRisk", () => {
     expect(worstLevel(assessRisk(explain("^\\d{4}-\\d{2}-\\d{2}$")))).toBeNull();
   });
 
-  // The ambiguous-alternation check compares the first node of each branch by
-  // its source text, so it only fires when two branches start identically.
+  // The ambiguous-alternation check compares the opening node of each branch,
+  // firing when one branch's opening text is a prefix of another's. Equality is
+  // the special case where the two are the same length.
   it("flags alternation branches that begin with the same node", () => {
     expect(checks("(a|a)*")).toEqual(["ambiguous"]);
   });
 
-  // Documented limit rather than desired behaviour. `(a|ab)*` is the textbook
-  // ambiguous alternation and this check misses it, because "a" and "ab" parse
-  // into one literal node each and their sources differ. Pinned so that a fix
-  // has to come here and change this expectation deliberately.
-  it("misses ambiguous branches that merely share a prefix", () => {
-    expect(checks("(a|ab)*")).toEqual([]);
+  // The textbook ambiguous alternation. The parser coalesces adjacent literals,
+  // so `ab` arrives as one node and the sources differ; comparing by prefix is
+  // what catches it. Order must not matter.
+  it("flags branches where one opening is a prefix of another", () => {
+    expect(checks("(a|ab)*")).toEqual(["ambiguous"]);
+    expect(checks("(ab|a)*")).toEqual(["ambiguous"]);
+    expect(checks("(ab|abc)*")).toEqual(["ambiguous"]);
+  });
+
+  it("does not flag alternation branches that start differently", () => {
+    expect(checks("(a|b)*")).toEqual([]);
+    expect(checks("(ab|ba)*")).toEqual([]);
+  });
+
+  // Still a documented limit: overlap through a character class rather than a
+  // shared literal prefix is not detected. Pinned so a fix changes it here.
+  it("misses branches that overlap through a character class", () => {
+    expect(checks("(a|[ab])*")).toEqual([]);
   });
 });

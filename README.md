@@ -5,7 +5,7 @@
 [![CI](https://github.com/martin-k-m/snare/actions/workflows/ci.yml/badge.svg)](https://github.com/martin-k-m/snare/actions/workflows/ci.yml)
 [![licence: MIT](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
 [![live](https://img.shields.io/badge/live-martin--k--m.github.io-brightgreen.svg)](https://martin-k-m.github.io/snare/)
-[![tests](https://img.shields.io/badge/tests-59%20passing-brightgreen.svg)](src/lib)
+[![tests](https://img.shields.io/badge/tests-61%20passing-brightgreen.svg)](src/lib)
 [![expectations](https://img.shields.io/badge/expectations-pass%2Ffail%20cases-7c6cff.svg)](#what-it-does)
 [![export](https://img.shields.io/badge/export-7%20languages-7c6cff.svg)](#what-it-does)
 [![ReDoS](https://img.shields.io/badge/ReDoS-backtracking%20analysis-7c6cff.svg)](#the-one-interesting-engineering-decision)

@@ -156,9 +156,11 @@ npm run build
 - The risk checks are heuristics over pattern structure. A clean result means
   "no known hazard was found", not "this pattern is safe on adversarial input".
   Cap the length of untrusted input regardless.
-- The ambiguous-alternation check compares branches by their first node, so it
-  catches `(a|a)*` and misses `(a|ab)*`, where one branch is a prefix of the
-  other. That miss has a test of its own so it stays a known gap rather than a
+- The ambiguous-alternation check compares the opening node of each branch and
+  fires when one branch's opening text is a prefix of another's, so it catches
+  `(a|a)*`, `(a|ab)*` and `(ab|abc)*`. It still misses overlap that goes through
+  a character class rather than a shared literal prefix, such as `(a|[ab])*`.
+  That miss has a test of its own so it stays a known gap rather than a
   surprise.
 - Matching uses the browser's own engine, so results reflect JavaScript
   semantics — not PCRE, RE2 or Python's `re`.

@@ -5,7 +5,7 @@
 [![CI](https://github.com/martin-k-m/snare/actions/workflows/ci.yml/badge.svg)](https://github.com/martin-k-m/snare/actions/workflows/ci.yml)
 [![licence: MIT](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
 [![live](https://img.shields.io/badge/live-martin--k--m.github.io-brightgreen.svg)](https://martin-k-m.github.io/snare/)
-[![tests](https://img.shields.io/badge/tests-52%20passing-brightgreen.svg)](src/lib)
+[![tests](https://img.shields.io/badge/tests-59%20passing-brightgreen.svg)](src/lib)
 [![expectations](https://img.shields.io/badge/expectations-pass%2Ffail%20cases-7c6cff.svg)](#what-it-does)
 [![export](https://img.shields.io/badge/export-7%20languages-7c6cff.svg)](#what-it-does)
 [![ReDoS](https://img.shields.io/badge/ReDoS-backtracking%20analysis-7c6cff.svg)](#the-one-interesting-engineering-decision)
@@ -29,8 +29,9 @@ Everything runs in the browser. Nothing you paste leaves the page.
   character classes and unicode property escapes all get described in reading
   order.
 - **Backtracking analysis** that flags nested unbounded repetition (`(a+)+`),
-  ambiguous alternation inside a repeat (`(a|ab)*`), and adjacent repeats over
-  the same character set (`.*.*`).
+  alternation branches inside a repeat that start with the same node (`(a|a)*`),
+  and adjacent repeats over the same character set (`.*.*`). What each check does
+  and does not catch is pinned in [`risk.test.ts`](src/lib/regex/risk.test.ts).
 - **Replacement preview** with `$1`, `$<name>`, `$&`, `` $` `` and `$'`.
 - **Pattern library** behind `⌘K` / `Ctrl-K`, each entry with a note about where
   it stops being correct.
@@ -124,7 +125,13 @@ threshold, a scrollable region that could not be reached by keyboard, and status
 colours that were only ever defined for the dark theme — so light mode was
 rendering pale amber on white.
 
+The audit reads the built export in `out/` and drives a real Chromium, and
+neither arrives with `npm install`. Both lines below are prerequisites, not
+options:
+
 ```bash
+npx playwright install chromium
+GITHUB_PAGES=true npm run build
 npm run audit
 ```
 
@@ -149,6 +156,10 @@ npm run build
 - The risk checks are heuristics over pattern structure. A clean result means
   "no known hazard was found", not "this pattern is safe on adversarial input".
   Cap the length of untrusted input regardless.
+- The ambiguous-alternation check compares branches by their first node, so it
+  catches `(a|a)*` and misses `(a|ab)*`, where one branch is a prefix of the
+  other. That miss has a test of its own so it stays a known gap rather than a
+  surprise.
 - Matching uses the browser's own engine, so results reflect JavaScript
   semantics — not PCRE, RE2 or Python's `re`.
 
